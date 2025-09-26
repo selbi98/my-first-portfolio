@@ -1,11 +1,16 @@
 import React from "react";
 import ReminderItem from "./ReminderItem";
 
-const ReminderList = ({ reminders }) => {
+const ReminderList = ({ reminders, onDeleteReminder, onToggleTaken}) => {
     return (
       <div>
         {reminders.map((reminder) => (
-          <ReminderItem key={reminder.id} reminder={reminder} />
+          <ReminderItem 
+          key={reminder.id} 
+          reminder={reminder}
+          onDeleteReminder={onDeleteReminder}
+          onToggleTaken={onToggleTaken}
+          />
         ))}
       </div>
     );
