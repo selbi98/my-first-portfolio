@@ -1,118 +1,88 @@
-import { useEffect, useReducer, useState, useMemo } from 'react'
-import './App.css'
-import AddReminderForm from './components/AddReminderForm'
+import { useEffect, useReducer, useMemo } from 'react';
+import './App.css';
+import { reducer, getInitialState } from './remindersReducer';
+import AddReminderForm from './components/AddReminderForm';
 import ReminderList from './components/ReminderList';
 import FilterControls from './components/FilterControls';
 
-const getInitialReminders = () => {
-  const storedReminders = localStorage.getItem('reminders');
-  return storedReminders ? JSON.parse(storedReminders) : [];
-};
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'ADD_REMINDER':
-     return [...state, action.payload]; 
-    
-    case 'DELETE_REMINDER': 
-     return state.filter((reminder) => reminder.id !== action.payload);
-
-    case 'TOGGLE_TAKEN':
-     return state.map((reminder) => {
-    
-      if (reminder.id === action.payload) {
-      return { ...reminder, taken: !reminder.taken }; 
-    }
-   
-    return reminder;
-  });
-
-    default:
-      return state; 
-  }
-};
-
 
 function App() {
-  const [reminders, dispatch] = useReducer(reducer, [], getInitialReminders);
+    const [state, dispatch] = useReducer(reducer, null, getInitialState);
+    const { reminders, filterStatus, sortOrder } = state;
 
-  const [filterStatus, setFilterStatus] = useState ('all');
+    useEffect(() => {
+        localStorage.setItem('reminders', JSON.stringify(reminders));
+    }, [reminders]); 
 
-  const [sortOrder, setSortOrder] = useState ('asc');
+    const addReminder = (newReminder) => {
+        dispatch({ type: 'ADD_REMINDER', payload: newReminder });
+    };
 
-  useEffect(() => {
-    localStorage.setItem('reminders', JSON.stringify(reminders));
-  }, [reminders]); 
+    const deleteReminder = (id) => {
+        dispatch({ type: 'DELETE_REMINDER', payload: id });
+    };
 
-  const addReminder = (newReminder) => {
-    dispatch({ type: 'ADD_REMINDER', payload: newReminder })
-  };
+    const toggleTaken = (id) => {
+        dispatch({ type: 'TOGGLE_TAKEN', payload: id });
+    };
 
-const deleteReminder = (id) => {
-  dispatch({type: 'DELETE_REMINDER', payload: id})
-};
+    const handleFilterChange = (status) => {
+        dispatch({ type: 'SET_FILTER', payload: status });
+    };
 
-const toggleTaken = (id) => {
-  dispatch({type: 'TOGGLE_TAKEN', payload: id})
-};
+    const toggleSortOrder = () => {
+        dispatch({ type: 'TOGGLE_SORT' });
+    };
 
-const handleFilterChange = (status) => {
-setFilterStatus(status)
-};
+    const filteredAndSortedReminders = useMemo(() => {
+        let filteredList;
+        switch (filterStatus) {
+            case 'taken':
+                filteredList = reminders.filter(r => r.taken);
+                break;
+            case 'pending':
+                filteredList = reminders.filter(r => !r.taken);
+                break;
+            case 'all':
+            default:
+                filteredList = reminders;
+        }
 
-const FilteredReminders = useMemo(() => {
-  let filteredList;
-  switch (filterStatus) {
-      case 'taken':
-          filteredList = reminders.filter(r => r.taken);
-          break;
-      case 'pending':
-          filteredList = reminders.filter(r => !r.taken);
-          break;
-      case 'all':
-      default:
-          filteredList = reminders;
-  }
+        let sortedList = [...filteredList];
 
-  let sortedList = [...filteredList];
+        sortedList.sort((a, b) => {
+            if (sortOrder === 'asc') {
+                return a.time.localeCompare(b.time); 
+            } else {
+                return b.time.localeCompare(a.time); 
+            }
+        });
 
-  sortedList.sort((a, b) => {
-    
-      if (sortOrder === 'asc') {
-          return a.time.localeCompare(b.time); 
-      } else {
-          return b.time.localeCompare(a.time); 
-      }
-  });
-
-  return sortedList;
-}, [reminders, filterStatus, sortOrder]); 
-
-const toggleSortOrder = () => {
-  setSortOrder( prevOrder => prevOrder == 'asc' ? 'desc' : 'asc')
-};
+        return sortedList;
+    }, [reminders, filterStatus, sortOrder]);
 
 
-  return (
-    <div className='App'>
-      <h1>Напоминания о приёме лекарств</h1>
-      <AddReminderForm onAddReminder={addReminder}/>
-      <FilterControls 
-      onFilterChange = {handleFilterChange}
-      currentFilter = {filterStatus}
-      onSortToggle = {toggleSortOrder}
-
-      />
-      {FilteredReminders.length > 0 ? (
-        <ReminderList 
-        reminders={FilteredReminders}
-        onDeleteReminder={deleteReminder}
-        onToggleTaken={toggleTaken}
-        /> ) : (
-          <p className='empty message'>Напоминаний пока нет. Добавьте первое, чтобы начать!</p>
-        )}
-      
-    </div>
-  )
+    return (
+        <div className='App'>
+            <h1>Напоминания о приёме лекарств</h1>
+            <AddReminderForm onAddReminder={addReminder}/>
+            <FilterControls 
+                onFilterChange={handleFilterChange}
+                currentFilter={filterStatus}
+                onSortToggle={toggleSortOrder}
+                sortOrder={sortOrder} 
+            />
+            {filteredAndSortedReminders.length > 0 ? (
+                <ReminderList 
+                    reminders={filteredAndSortedReminders}
+                    onDeleteReminder={deleteReminder}
+                    onToggleTaken={toggleTaken}
+                /> 
+            ) : (
+                <p className='empty message'>Напоминаний пока нет. Добавьте первое, чтобы начать!</p>
+            )}
+        </div>
+    );
 }
 
-export default App
+export default App;

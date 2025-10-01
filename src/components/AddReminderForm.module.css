@@ -25,3 +25,17 @@
   flex-grow: 1;
     
 }
+
+@media (max-width: 500px) {
+    .form {
+      flex-direction: column; 
+      gap: 15px; 
+    }
+  
+    .formName, 
+    .formTime, 
+    .formButton {
+      width: 100%; 
+      box-sizing: border-box;
+    }
+  }

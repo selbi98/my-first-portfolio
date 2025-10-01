@@ -3,7 +3,7 @@ import ReminderItem from "./ReminderItem";
 
 const ReminderList = ({ reminders, onDeleteReminder, onToggleTaken}) => {
     return (
-      <div>
+      <div className="reminder-list"> 
         {reminders.map((reminder) => (
           <ReminderItem 
           key={reminder.id} 
@@ -17,4 +17,3 @@ const ReminderList = ({ reminders, onDeleteReminder, onToggleTaken}) => {
   };
 
 export default ReminderList;
-
