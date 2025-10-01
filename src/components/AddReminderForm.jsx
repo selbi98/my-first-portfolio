@@ -7,10 +7,17 @@ function AddReminderForm ({onAddReminder})  {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-
+    
+        const trimmedName = name.trim(); 
+    
+        if (!trimmedName) { 
+            alert('Пожалуйста, введите название препарата.'); 
+            return; 
+        }
+        
         const newReminder = {
             id: Date.now(),
-            name,
+            name: trimmedName, 
             time,
             taken: false,
         };

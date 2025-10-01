@@ -11,6 +11,12 @@
     cursor: pointer; 
     transition: all 0.3s ease;
     font-size: 1.1em;
+    color: white; 
+    transition: 
+      opacity 0.3s ease-out, 
+      transform 0.3s ease-out, 
+      max-height 0.3s ease-out, 
+      margin 0.3s ease-out;
   }
   
   .itemCompleted {
@@ -21,6 +27,11 @@
     border-left-color: #adb5bd; 
     color: #6c757d; 
     text-decoration: line-through; 
+    transition: 
+      opacity 0.3s ease-out, 
+      transform 0.3s ease-out, 
+      max-height 0.3s ease-out, 
+      margin 0.3s ease-out;
   }
   
   .deleteButton {
@@ -32,9 +43,18 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
-    flex-shrink: 0; /* Не даем кнопке сжиматься */
+    flex-shrink: 0; 
   }
   
   .deleteButton:hover {
     background-color: #c82368; 
   }
+  .isDeleting {
+    opacity: 0; 
+    max-height: 0; 
+    padding: 0 15px; 
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateX(-100%); 
+} 
+  

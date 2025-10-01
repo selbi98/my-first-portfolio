@@ -1,7 +1,8 @@
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useState, useMemo } from 'react'
 import './App.css'
 import AddReminderForm from './components/AddReminderForm'
 import ReminderList from './components/ReminderList';
+import FilterControls from './components/FilterControls';
 
 const getInitialReminders = () => {
   const storedReminders = localStorage.getItem('reminders');
@@ -25,14 +26,18 @@ const reducer = (state, action) => {
     return reminder;
   });
 
-
     default:
       return state; 
   }
 };
 
+
 function App() {
   const [reminders, dispatch] = useReducer(reducer, [], getInitialReminders);
+
+  const [filterStatus, setFilterStatus] = useState ('all');
+
+  const [sortOrder, setSortOrder] = useState ('asc');
 
   useEffect(() => {
     localStorage.setItem('reminders', JSON.stringify(reminders));
@@ -50,13 +55,56 @@ const toggleTaken = (id) => {
   dispatch({type: 'TOGGLE_TAKEN', payload: id})
 };
 
+const handleFilterChange = (status) => {
+setFilterStatus(status)
+};
+
+const FilteredReminders = useMemo(() => {
+  let filteredList;
+  switch (filterStatus) {
+      case 'taken':
+          filteredList = reminders.filter(r => r.taken);
+          break;
+      case 'pending':
+          filteredList = reminders.filter(r => !r.taken);
+          break;
+      case 'all':
+      default:
+          filteredList = reminders;
+  }
+
+  let sortedList = [...filteredList];
+
+  sortedList.sort((a, b) => {
+    
+      if (sortOrder === 'asc') {
+          return a.time.localeCompare(b.time); 
+      } else {
+          return b.time.localeCompare(a.time); 
+      }
+  });
+
+  return sortedList;
+}, [reminders, filterStatus, sortOrder]); 
+
+const toggleSortOrder = () => {
+  setSortOrder( prevOrder => prevOrder == 'asc' ? 'desc' : 'asc')
+};
+
+
   return (
     <div className='App'>
       <h1>Напоминания о приёме лекарств</h1>
       <AddReminderForm onAddReminder={addReminder}/>
-      {reminders.length > 0 ? (
+      <FilterControls 
+      onFilterChange = {handleFilterChange}
+      currentFilter = {filterStatus}
+      onSortToggle = {toggleSortOrder}
+
+      />
+      {FilteredReminders.length > 0 ? (
         <ReminderList 
-        reminders={reminders}
+        reminders={FilteredReminders}
         onDeleteReminder={deleteReminder}
         onToggleTaken={toggleTaken}
         /> ) : (
